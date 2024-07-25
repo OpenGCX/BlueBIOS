@@ -8,7 +8,6 @@ local res_x, res_y = gpu.getResolution()
 gpu.setBackground(0x003150)
 
 gpu.fill(1, 1, res_x, res_y, " ")
-local internet, request
 
 local line_count = 0
 local new_line = function(text) line_count = line_count + 1; return gpu.set(1, line_count, text) end
@@ -16,17 +15,17 @@ local new_line = function(text) line_count = line_count + 1; return gpu.set(1, l
 new_line("Attempting to download Cyan BIOS from the internet...")
 if not component.list("internet")() then
     new_line("ERR No internet component")
-    goto eof
+    reboot()
 end
 
-internet = component.proxy(component.list("internet")())
+local internet = component.proxy(component.list("internet")())
 
 if not internet.isHttpEnabled() then
     new_line("ERR Http is disabled in your configuration")
-    goto eof
+    reboot()
 end
 
-request = internet.request("https://github.com/OpenGCX/BlueBIOS/raw/main/binaries/blue.bin")
+local request = internet.request("https://github.com/OpenGCX/BlueBIOS/raw/main/binaries/blue.bin")
 
 if request then
     new_line("SUCCESS Fetched data")
@@ -36,19 +35,24 @@ if request then
         local result, reason = pcall(component.invoke(eeprom.address, "set", data))
         if not result then
             new_line("ERR " .. tostring(reason))
-            goto eof
+            reboot()
         end
         new_line("SUCCESS Flashed EEPROM")
         eeprom.setLabel("Blue BIOS")
         new_line("SUCCESS Set EEPROM label to 'Blue BIOS'")
+        reboot()
     end
+    new_line("ERR An unexpected error has occured: requested data not available")
 end
 
-::eof::
-new_line("=> This computer will reboot in 3 seconds")
-local time = computer.uptime()
+reboot()
 
-repeat until time+3 <= computer.uptime()
-new_line("=> Rebooting...")
+function _G.reboot()
+    new_line("=> This computer will reboot in 3 seconds")
+    local time = computer.uptime()
 
-computer.shutdown(true)
+    repeat until time+3 <= computer.uptime()
+    new_line("=> Rebooting...")
+
+    computer.shutdown(true)
+end
