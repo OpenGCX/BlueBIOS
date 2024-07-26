@@ -1,7 +1,7 @@
 local component = component ---@diagnostic disable-line: undefined-global
 local computer = computer ---@diagnostic disable-line: undefined-global
 
-local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, bios, event, code, internet, request, data, shell, shift, caps_lock, letter, char, command, reason, chunk, bios_ran, run_shell
+local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, bios, event, code, internet, request, data, shell, shift, caps_lock, letter, char, command, reason, chunk, run_shell
 gpu = component.proxy(component.list("gpu")())
 gpu.bind(component.proxy(component.list("screen")()).address)
 
@@ -187,18 +187,13 @@ end
 ::boot::
 
 if not bios then
-    if not init == "" and init then
-        centrize("Booting to " .. (boot_label ~= nil and boot_label or "N/A") .. " (" .. boot_drive .. ")")
-        return load(init)()
-    elseif bios_ran then
-        run_shell = true
-    end
+    centrize("Booting to " .. (boot_label ~= nil and boot_label or "N/A") .. " (" .. boot_drive .. ")")
+    return load(init)()
 end
 
 ::bios::
 
 bios = false
-bios_ran = true
 bl_bin = initialize(boot_address, "/bios/bl.bin")
 
 if bl_bin or run_shell then
@@ -251,4 +246,8 @@ else
     shell()
 end
 
-goto boot
+if init then
+    goto boot
+else
+    computer.shutdown(1)
+end
