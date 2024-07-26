@@ -147,7 +147,7 @@ if file then
     data = file:read("*a")
     file:close()
 
-    file = io.open("compressed.bin", "w")
+    file = io.open("blue.bin", "w")
     if file then
         file:write(lzss.getSXF(lzss.compress(data), true))
         file:close()
