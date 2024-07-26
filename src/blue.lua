@@ -1,7 +1,7 @@
 local component = component ---@diagnostic disable-line: undefined-global
 local computer = computer ---@diagnostic disable-line: undefined-global
 
-local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, bios, event, code, internet, request, data, shell, shift, caps_lock, letter, char, command, reason, chunk, run_shell
+local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, event, code, internet, request, data, shell, shift, caps_lock, letter, char, command, reason, chunk
 gpu = component.proxy(component.list("gpu")())
 gpu.bind(component.proxy(component.list("screen")()).address)
 
@@ -81,8 +81,8 @@ function shell()
     else
         if event == "key_down" then
             if code == 28 then
-                if command == "exit" then
-                    return
+                if (command == "exit") or (command == "reboot") then
+                    computer.shutdown(1)
                 elseif command == "shutdown" then
                     computer.shutdown()
                 end
@@ -133,18 +133,20 @@ function computer.setBootAddress(address)
     return eeprom.setData(address)
 end
 
+::load::
+
 boot_address = computer.getBootAddress()
 init = initialize(boot_address)
 
 if init and component.invoke(boot_address, "getLabel") ~= "tmpfs" then
-    boot_label = component.invoke(boot_drive, "getLabel")
     boot_drive = boot_address
 else
     for i in pairs(component.list("filesystem")) do
         init = initialize(i)
         boot_drive = i
-        if init then
+        if init and init ~= "" then
             computer.setBootAddress(i)
+            goto load
             break
         end
     end
@@ -152,6 +154,7 @@ end
 
 ::plugins::
 
+boot_label = component.invoke(boot_drive, "getLabel")
 result = component.invoke(boot_drive, "list", "/bios/plugins/")
 
 if result then
@@ -174,33 +177,27 @@ if not init then
     goto bios
 end
 
-if not bios then
-    repeat
-        event, _, _, code = computer.pullSignal(1)
-        if event == "key_down" and code == (56 or 184) then
-            bios = true
-            break
-        end
-    until boot_time+1 <= computer.uptime()
-end
+repeat
+    event, _, _, code = computer.pullSignal(1)
+    if event == "key_down" and code == (56 or 184) then
+        goto bios
+    end
+until boot_time+1 <= computer.uptime()
 
 ::boot::
 
-if not bios then
-    centrize("Booting to " .. (boot_label ~= nil and boot_label or "N/A") .. " (" .. boot_drive .. ")")
-    return load(init)()
-end
+centrize("Booting to " .. (boot_label ~= nil and boot_label or "N/A") .. " (" .. boot_drive .. ")")
+load(init)()
 
 ::bios::
 
-bios = false
-bl_bin = initialize(boot_address, "/bios/bl.bin")
+bl_bin = initialize(boot_drive, "/bios/bl.bin")
 
-if bl_bin or run_shell then
+if bl_bin then
     goto eof
 end
 
-if boot_drive then
+if component.list("filesystem")() then
     for i in component.list("filesystem") do
         bl_bin = initialize(i, "/bios/bl.bin")
         if bl_bin then
@@ -239,7 +236,7 @@ end
 
 ::eof::
 
-if bl_bin and not run_shell then
+if bl_bin and bl_bin ~= "" then
     load(bl_bin)()
 else
     centrize("")
