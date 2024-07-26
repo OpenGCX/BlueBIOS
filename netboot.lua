@@ -5,8 +5,6 @@ local eeprom = component.proxy(component.list("eeprom")())
 local gpu = component.proxy(component.list("gpu")())
 
 local res_x, res_y = gpu.getResolution()
-gpu.setBackground(0x003150)
-
 gpu.fill(1, 1, res_x, res_y, " ")
 
 local line_count = 0
