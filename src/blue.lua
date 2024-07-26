@@ -136,7 +136,8 @@ end
 boot_address = computer.getBootAddress()
 init = initialize(boot_address)
 
-if init then
+if init and component.invoke(boot_address, "getLabel") ~= "tmpfs" then
+    boot_label = component.invoke(boot_drive, "getLabel")
     boot_drive = boot_address
 else
     for i in pairs(component.list("filesystem")) do
@@ -151,7 +152,6 @@ end
 
 ::plugins::
 
-boot_label = component.invoke(boot_drive, "getLabel")
 result = component.invoke(boot_drive, "list", "/bios/plugins/")
 
 if result then
