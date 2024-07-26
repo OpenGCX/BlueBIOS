@@ -1,11 +1,12 @@
 local component = component ---@diagnostic disable-line: undefined-global
 local computer = computer ---@diagnostic disable-line: undefined-global
 
-local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, bios, event, code, internet, request, data, shell, shift, caps_lock, letter, char, command, reason
+local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, bios, event, code, internet, request, data, shell, shift, caps_lock, letter, char, command, reason, chunk
 gpu = component.proxy(component.list("gpu")())
 gpu.bind(component.proxy(component.list("screen")()).address)
 
 res_x, res_y = gpu.getResolution()
+gpu.setForeground(0x9cc3db)
 gpu.setBackground(0x003150)
 
 access_drive = function(drive, action, file, extra_arg) if extra_arg then return pcall(component.invoke, drive, action, file, extra_arg) else return pcall(component.invoke, drive, action, file) end end
@@ -207,7 +208,13 @@ if not bl_bin then
         if component.invoke(internet, "isHttpEnabled") then
             request = component.invoke(internet, "request", "https://raw.githubusercontent.com/OpenGCX/BlueBIOS/main/binaries/bl.bin")
             if request then
-                data = request.read()
+                data = ""
+                ::parse::
+                chunk = request.read()
+                if chunk then
+                    data = data .. chunk
+                    goto parse
+                end
                 if data then
                     bl_bin = data
                     if boot_drive then
