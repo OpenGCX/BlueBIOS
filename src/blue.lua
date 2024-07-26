@@ -173,6 +173,7 @@ if not bios then
         event, _, _, code = computer.pullSignal(1)
         if event == "key_down" and code == (56 or 184) then
             bios = true
+            break
         end
     until boot_time+1 <= computer.uptime()
 end
