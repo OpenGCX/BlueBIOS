@@ -1,7 +1,7 @@
 local component = component ---@diagnostic disable-line: undefined-global
 local computer = computer ---@diagnostic disable-line: undefined-global
 
-local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, bios, event, code, internet, request, data, shell, shift, caps_lock, letter, char, command, reason, chunk
+local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, bios, event, code, internet, request, data, shell, shift, caps_lock, letter, char, command, reason, chunk, bios_ran, run_shell
 gpu = component.proxy(component.list("gpu")())
 gpu.bind(component.proxy(component.list("screen")()).address)
 
@@ -18,7 +18,13 @@ function initialize(drive, opt_file)
         state, handle = access_drive(drive, "open", "/init.lua")
     end
     if state then
-        _, data = access_drive(drive, "read", handle, math.maxinteger)
+        data = ""
+        ::parse::
+        _, chunk = access_drive(drive, "read", handle, math.maxinteger)
+        if chunk then
+            data = data .. chunk
+            goto parse
+        end
         access_drive(drive, "close", handle)
         return data
     else
@@ -181,16 +187,21 @@ end
 ::boot::
 
 if not bios then
-    centrize("Booting to " .. (boot_label ~= nil and boot_label or "N/A") .. " (" .. boot_drive .. ")")
-    return load(init)()
+    if not init == "" and init then
+        centrize("Booting to " .. (boot_label ~= nil and boot_label or "N/A") .. " (" .. boot_drive .. ")")
+        return load(init)()
+    elseif bios_ran then
+        run_shell = true
+    end
 end
 
 ::bios::
 
 bios = false
+bios_ran = true
 bl_bin = initialize(boot_address, "/bios/bl.bin")
 
-if bl_bin then
+if bl_bin or run_shell then
     goto eof
 end
 
@@ -216,7 +227,7 @@ if not bl_bin then
                     data = data .. chunk
                     goto parse
                 end
-                if data then
+                if not data == "" and data then
                     bl_bin = data
                     if boot_drive then
                         state, handle = access_drive(boot_drive, "open", "/bios/bl.bin", "w")
@@ -233,7 +244,7 @@ end
 
 ::eof::
 
-if bl_bin then
+if bl_bin and not run_shell then
     load(bl_bin)()
 else
     centrize("")
