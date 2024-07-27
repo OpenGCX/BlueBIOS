@@ -1,7 +1,7 @@
 local component = component ---@diagnostic disable-line: undefined-global
 local computer = computer ---@diagnostic disable-line: undefined-global
 
-local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, event, code, internet, request, data, shell, shift, caps_lock, letter, char, command, reason, chunk
+local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, event, code, internet, request, data, shift, caps_lock, letter, char, command, reason, chunk, isReadOnly
 gpu = component.proxy(component.list("gpu")())
 gpu.bind(component.proxy(component.list("screen")()).address)
 
@@ -37,7 +37,7 @@ function centrize(message)
     return gpu.set(math.ceil(res_x/2-#message/2), math.ceil(res_y/2),  message)
 end
 
-function shell()
+function _G.shell()
     _G.buffer = {}
     _G.print = function(text)
         for _ in string.gmatch(tostring(text), "[^\r\n]+") do
@@ -156,6 +156,7 @@ end
 
 boot_label = component.invoke(boot_drive, "getLabel")
 result = component.invoke(boot_drive, "list", "/bios/plugins/")
+_, isReadOnly = access_drive(boot_drive, "isReadOnly")
 
 if result then
     for _, j in ipairs(result) do
@@ -165,9 +166,11 @@ if result then
         end
     end
 else
-    state = pcall(component.invoke, boot_drive, "makeDirectory", "/bios/plugins/")
-    if state then
-        goto plugins
+    if not isReadOnly then
+        state = pcall(component.invoke, boot_drive, "makeDirectory", "/bios/plugins/")
+        if state then
+            goto plugins
+        end
     end
 end
 
@@ -222,10 +225,12 @@ if not bl_bin then
                 if not data == "" and data then
                     bl_bin = data
                     if boot_drive then
-                        state, handle = access_drive(boot_drive, "open", "/bios/bl.bin", "w")
-                        if state then
-                            access_drive(boot_drive, "write", handle, bl_bin)
-                            access_drive(boot_drive, "close", handle)
+                        if not isReadOnly then
+                            state, handle = access_drive(boot_drive, "open", "/bios/bl.bin", "w")
+                            if state then
+                                access_drive(boot_drive, "write", handle, bl_bin)
+                                access_drive(boot_drive, "close", handle)
+                            end
                         end
                     end
                 end
