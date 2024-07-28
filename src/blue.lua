@@ -1,7 +1,7 @@
 local component = component ---@diagnostic disable-line: undefined-global
 local computer = computer ---@diagnostic disable-line: undefined-global
 
-pcall(computer, "setArchitecture", "Lua 5.4")
+computer.setArchitecture("Lua 5.4")
 
 local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, event, code, internet, request, data, shift, caps_lock, letter, char, command, reason, chunk, isReadOnly
 gpu = component.proxy(component.list("gpu")())

@@ -129,7 +129,7 @@ local SXF = ([[local i,b,o,d,e,f,g,h,l='%s',1,'',''while b<=#i do e=o.byte(i,b)b
     )
 
 if lua53 then
-    SXF = ('computer.setArchitecture"Lua 5.3"load([=[%s]=])()'):format(SXF)
+    SXF = ('if computer.getArchitecture() == "Lua 5.2"then computer.setArchitecture"Lua 5.3"end;load([=[%s]=])()'):format(SXF)
 end
 
 return SXF
