@@ -1,13 +1,18 @@
 local component = component ---@diagnostic disable-line: undefined-global
 local computer = computer ---@diagnostic disable-line: undefined-global
 
+pcall(computer, "setArchitecture", "Lua 5.4")
+
 local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, event, code, internet, request, data, shift, caps_lock, letter, char, command, reason, chunk, isReadOnly
 gpu = component.proxy(component.list("gpu")())
 gpu.bind(component.proxy(component.list("screen")()).address)
 
 res_x, res_y = gpu.getResolution()
-gpu.setForeground(0x9cc3db)
-gpu.setBackground(0x003150)
+
+if gpu.getDepth() > 1 then
+    gpu.setForeground(0x9cc3db)
+    gpu.setBackground(0x003150)
+end
 
 access_drive = function(drive, action, file, extra_arg) if extra_arg then return pcall(component.invoke, drive, action, file, extra_arg) else return pcall(component.invoke, drive, action, file) end end
 
@@ -81,7 +86,9 @@ function _G.shell()
     else
         if event == "key_down" then
             if code == 28 then
-                if (command == "exit") or (command == "reboot") then
+                if command == "exit" then
+                    return
+                elseif command == "reboot" then
                     computer.shutdown(1)
                 elseif command == "shutdown" then
                     computer.shutdown()
@@ -189,7 +196,11 @@ until boot_time+1 <= computer.uptime()
 
 ::boot::
 
-centrize("Booting to " .. (boot_label ~= nil and boot_label or "N/A") .. " (" .. boot_drive .. ")")
+if gpu.getDepth() > 1 then
+    centrize("Booting to " .. (boot_label ~= nil and boot_label or "N/A") .. " (" .. boot_drive .. ")")
+else
+    centrize("Booting to " .. (boot_label ~= nil and boot_label or "N/A"))
+end
 load(init)()
 
 ::bios::
