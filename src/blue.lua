@@ -7,6 +7,9 @@ local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boo
 gpu = component.proxy(component.list("gpu")())
 gpu.bind(component.proxy(component.list("screen")()).address)
 
+_G.blue = {}
+blue.vb = {}
+blue.fn = {}
 res_x, res_y = gpu.getResolution()
 
 if gpu.getDepth() > 1 then
@@ -17,11 +20,7 @@ end
 access_drive = function(drive, action, file, extra_arg) if extra_arg then return pcall(component.invoke, drive, action, file, extra_arg) else return pcall(component.invoke, drive, action, file) end end
 
 function initialize(drive, opt_file)
-    if opt_file then
-        state, handle = access_drive(drive, "open", opt_file)
-    else
-        state, handle = access_drive(drive, "open", "/init.lua")
-    end
+    state, handle = access_drive(drive, "open", opt_file)
     if state then
         data = ""
         ::parse::
@@ -42,7 +41,7 @@ function centrize(message)
     return gpu.set(math.ceil(res_x/2-#message/2), math.ceil(res_y/2),  message)
 end
 
-function _G.shell()
+function blue.fn.shell()
     _G.buffer = {}
     _G.print = function(text)
         for _ in string.gmatch(tostring(text), "[^\r\n]+") do
@@ -64,9 +63,19 @@ function _G.shell()
     ::render::
     centrize("")
 
+    if gpu.getDepth() < 1 then
+        gpu.setBackground(0x003150)
+    end
+
     for i=1,res_y do
         if buffer[#buffer-i+1] then
-            gpu.set(1, res_y-i+1, buffer[#buffer-i+1])
+            if i == 1 and gpu.getDepth() < 1 then
+                gpu.setForeground(0xaec5d4)
+                gpu.set(1, res_y-i+1, buffer[#buffer-i+1])
+                gpu.setForeground(0x9cc3db)
+            else
+                gpu.set(1, res_y-i+1, buffer[#buffer-i+1])
+            end
         end
     end
 
@@ -140,20 +149,24 @@ function computer.setBootAddress(address)
     return eeprom.setData(address)
 end
 
-::load::
-
 boot_address = computer.getBootAddress()
-init = initialize(boot_address)
+blue.vb.init = initialize(boot_address, "/init.lua")
 
-if init and component.invoke(boot_address, "getLabel") ~= "tmpfs" then
-    boot_drive = boot_address
+if not blue.vb.init then
+    blue.vb.init = initialize(boot_address, "/OS.lua")
+end
+
+if blue.vb.init and blue.vb.init ~= "" and component.invoke(boot_address, "getLabel") ~= "tmpfs" then
+    blue.vb.boot_drive = boot_address
 else
     for i in pairs(component.list("filesystem")) do
-        init = initialize(i)
-        boot_drive = i
+        blue.vb.init = initialize(i, "/init.lua")
+        blue.vb.boot_drive = i
+        if not init then
+            blue.vb.init = initialize(i, "/OS.lua")
+        end
         if init and init ~= "" then
             computer.setBootAddress(i)
-            goto load
             break
         end
     end
@@ -161,20 +174,20 @@ end
 
 ::plugins::
 
-boot_label = component.invoke(boot_drive, "getLabel")
-result = component.invoke(boot_drive, "list", "/bios/plugins/")
-_, isReadOnly = access_drive(boot_drive, "isReadOnly")
+blue.vb.boot_label = component.invoke(blue.vb.boot_drive, "getLabel")
+result = component.invoke(blue.vb.boot_drive, "list", "/bios/plugins/")
+_, isReadOnly = access_drive(blue.vb.boot_drive, "isReadOnly")
 
 if result then
     for _, j in ipairs(result) do
         if not j:match(".*/$") then
-            handle = component.invoke(boot_drive, "open", "/bios/plugins/" .. j)
-            load(component.invoke(boot_drive, "read", handle, math.huge) or "")()
+            handle = component.invoke(blue.vb.boot_drive, "open", "/bios/plugins/" .. j)
+            load(component.invoke(blue.vb.boot_drive, "read", handle, math.huge) or "")()
         end
     end
 else
     if not isReadOnly then
-        state = pcall(component.invoke, boot_drive, "makeDirectory", "/bios/plugins/")
+        state = pcall(component.invoke, blue.vb.boot_drive, "makeDirectory", "/bios/plugins/")
         if state then
             goto plugins
         end
@@ -197,9 +210,9 @@ until boot_time+1 <= computer.uptime()
 ::boot::
 
 if gpu.getDepth() > 1 then
-    centrize("Booting to " .. (boot_label ~= nil and boot_label or "N/A") .. " (" .. boot_drive .. ")")
+    centrize("Booting to " .. (blue.vb.boot_label ~= nil and blue.vb.boot_label or "N/A") .. " (" .. blue.vb.boot_drive .. ")")
 else
-    centrize("Booting to " .. (boot_label ~= nil and boot_label or "N/A"))
+    centrize("Booting to " .. (blue.vb.boot_label ~= nil and blue.vb.boot_label or "N/A"))
 end
 load(init)()
 
@@ -235,7 +248,7 @@ if not bl_bin then
                 end
                 if not data == "" and data then
                     bl_bin = data
-                    if boot_drive then
+                    if blue.vb.boot_drive then
                         if not isReadOnly then
                             state, handle = access_drive(boot_drive, "open", "/bios/bl.bin", "w")
                             if state then
@@ -256,7 +269,7 @@ if bl_bin and bl_bin ~= "" then
     load(bl_bin)()
 else
     centrize("")
-    shell()
+    blue.vb.shell()
 end
 
 if init then
