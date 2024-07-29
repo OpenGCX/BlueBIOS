@@ -237,7 +237,7 @@ if not bl_bin then
     internet = component.list("internet")()
     if internet then
         if component.invoke(internet, "isHttpEnabled") then
-            request = component.invoke(internet, "request", "https://raw.githubusercontent.com/OpenGCX/BlueBIOS/main/binaries/bl.bin")
+            request = component.invoke(internet, "request", "https://raw.githubusercontent.com/OpenGCX/BlueBIOS/unstable/binaries/bl.bin")
             if request then
                 data = ""
                 ::parse::
