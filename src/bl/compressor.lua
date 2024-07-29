@@ -120,7 +120,7 @@ end
 return table.concat(output)
 end
 
-function lzss.getSXF(input, lua53) -- lua53 - force Lua 5.3 (OpenComputers ONLY)
+function lzss.getSXF(input)
 input = input and input:gsub(".", {["\r"] = "\\r", ["\n"] = "\\n", ["\\"] = "\\\\", ["'"] = "\\'"})
 
 local SXF = ([[local i,b,o,d,e,f,g,h,l='%s',1,'',''while b<=#i do e=o.byte(i,b)b=b+1;for j=0,7 do h=o.sub;l=h(i,b,b)if e>>j&1<1 and b<#i then g=o.unpack('>I2',i,b)f=1+(g>>4);l=h(d,f,f+(g&15)+2)b=b+1 end;b=b+1;o=o..l;d=h(d..l,-4^6)end end load(o)()]])
@@ -128,9 +128,7 @@ local SXF = ([[local i,b,o,d,e,f,g,h,l='%s',1,'',''while b<=#i do e=o.byte(i,b)b
         input or ""
     )
 
-if lua53 then
-    SXF = ('if computer.getArchitecture() == "Lua 5.2"then computer.setArchitecture"Lua 5.3"end;load([=[%s]=])()'):format(SXF)
-end
+SXF = ('load([=[%s]=])()'):format(SXF)
 
 return SXF
 end
@@ -147,9 +145,9 @@ if file then
     data = file:read("*a")
     file:close()
 
-    file = io.open("blue.bin", "w")
+    file = io.open("bl.bin", "w")
     if file then
-        file:write(lzss.getSXF(lzss.compress(data), true))
+        file:write(lzss.getSXF(lzss.compress(data)))
         file:close()
     end
 end
