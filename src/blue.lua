@@ -3,7 +3,7 @@ local computer = computer ---@diagnostic disable-line: undefined-global
 
 computer.setArchitecture("Lua 5.4")
 
-local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, eeprom, boot_address, init, boot_drive, boot_label, result, state, handle, boot_time, event, code, internet, request, data, shift, caps_lock, letter, char, command, reason, chunk, isReadOnly
+local gpu, res_x, res_y, access_drive, initialize, bl_bin, centrize, boot_address, boot_drive, result, state, handle, boot_time, event, code, internet, request, data, shift, caps_lock, letter, char, command, reason, chunk, isReadOnly, clipboard
 gpu = component.proxy(component.list("gpu")())
 gpu.bind(component.proxy(component.list("screen")()).address)
 
@@ -131,6 +131,9 @@ function blue.fn.shell()
                 buffer[#buffer] = buffer[#buffer] .. letter
                 command = command .. letter
             end
+        elseif event == "clipboard" then
+            buffer[#buffer] = buffer[#buffer] .. char
+            command = command .. char
         end
     end
 
@@ -139,7 +142,7 @@ end
 
 centrize("Hold ALT to stay in bootloader")
 
-eeprom = component.proxy(component.list("eeprom")())
+_G.eeprom = component.proxy(component.list("eeprom")())
 
 function computer.getBootAddress()
     return eeprom.getData()
@@ -152,7 +155,7 @@ end
 boot_address = computer.getBootAddress()
 blue.vb.init = initialize(boot_address, "/init.lua")
 
-if not blue.vb.init then
+if not blue.vb.init or blue.vb.init == "" then
     blue.vb.init = initialize(boot_address, "/OS.lua")
 end
 
@@ -162,10 +165,10 @@ else
     for i in pairs(component.list("filesystem")) do
         blue.vb.init = initialize(i, "/init.lua")
         blue.vb.boot_drive = i
-        if not init then
+        if not blue.vb.init or blue.vb.init == "" then
             blue.vb.init = initialize(i, "/OS.lua")
         end
-        if init and init ~= "" then
+        if blue.vb.init and blue.vb.init ~= "" then
             computer.setBootAddress(i)
             break
         end
@@ -196,7 +199,7 @@ end
 
 boot_time = computer.uptime()
 
-if not init then
+if not blue.vb.init then
     goto bios
 end
 
@@ -214,7 +217,7 @@ if gpu.getDepth() > 1 then
 else
     centrize("Booting to " .. (blue.vb.boot_label ~= nil and blue.vb.boot_label or "N/A"))
 end
-load(init)()
+load(blue.vb.init)()
 
 ::bios::
 
@@ -224,20 +227,18 @@ if bl_bin then
     goto eof
 end
 
-if component.list("filesystem")() then
-    for i in component.list("filesystem") do
-        bl_bin = initialize(i, "/bios/bl.bin")
-        if bl_bin then
-            break
-        end
+for i in component.list("filesystem") do
+    bl_bin = initialize(i, "/bios/bl.bin")
+    if bl_bin and bl_bin ~= "" then
+        goto eof
     end
 end
 
-if not bl_bin then
+if not bl_bin or bl_bin == "" then
     internet = component.list("internet")()
     if internet then
         if component.invoke(internet, "isHttpEnabled") then
-            request = component.invoke(internet, "request", "https://raw.githubusercontent.com/OpenGCX/BlueBIOS/unstable/binaries/bl.bin")
+            request = component.invoke(internet, "request", "https://raw.githubusercontent.com/OpenGCX/BlueBIOS/main/binaries/bl.bin")
             if request then
                 data = ""
                 ::parse::
@@ -246,7 +247,7 @@ if not bl_bin then
                     data = data .. chunk
                     goto parse
                 end
-                if not data == "" and data then
+                if data and data ~= "" then
                     bl_bin = data
                     if blue.vb.boot_drive then
                         if not isReadOnly then
@@ -269,10 +270,10 @@ if bl_bin and bl_bin ~= "" then
     load(bl_bin)()
 else
     centrize("")
-    blue.vb.shell()
+    blue.fn.shell()
 end
 
-if init then
+if blue.vb.init and blue.vb.init ~= "" then
     goto boot
 else
     computer.shutdown(1)
