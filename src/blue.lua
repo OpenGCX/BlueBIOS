@@ -251,10 +251,10 @@ if not bl_bin or bl_bin == "" then
                     bl_bin = data
                     if blue.vb.boot_drive then
                         if not isReadOnly then
-                            state, handle = access_drive(boot_drive, "open", "/bios/bl.bin", "w")
+                            state, handle = access_drive(blue.vb.boot_drive, "open", "/bios/bl.bin", "w")
                             if state then
-                                access_drive(boot_drive, "write", handle, bl_bin)
-                                access_drive(boot_drive, "close", handle)
+                                access_drive(blue.vb.boot_drive, "write", handle, bl_bin)
+                                access_drive(blue.vb.boot_drive, "close", handle)
                             end
                         end
                     end
