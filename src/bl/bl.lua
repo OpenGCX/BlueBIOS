@@ -87,10 +87,8 @@ end
 gpu.fill(1, 1, res_x, res_y, " ")
 
 if selected_button < 1 then
-    gpu.set(1, res_y, tostring(true))
     selected_button = selected_row.optcount
 elseif selected_button > selected_row.optcount then
-    gpu.set(1, res_y, tostring(false))
     selected_button = 1
 end
 
@@ -128,6 +126,7 @@ end
 
 gpu.set(math.ceil(res_x/2)-math.ceil(#row_1_string/2), row_1.y, row_1_string)
 gpu.set(math.ceil(res_x/2)-math.ceil(#row_2_string/2), row_2.y, row_2_string)
+
 if gpu.getDepth() > 1 then
     gpu.set(math.ceil(res_x/2)-math.ceil(75/2), res_y, "Use ← ↑ → ↓ to move cursor; Enter to confirm option; CTRL+ALT+C to shutdown")
 else
@@ -139,19 +138,24 @@ if selected_row == row_1 then
     _G.full_string = row_1_string
     _G.determined_x = math.ceil(res_x/2)-math.ceil(#row_1_string/2)
     _G.determined_y = row_1.y
+    _G.row_opts = row_1_opts
 else
     _G.button_string = row_2_opts[selected_button] or row_2_opts[#row_2_opts]
     _G.full_string = row_2_string
     _G.determined_x = math.ceil(res_x/2)-math.ceil(#row_2_string/2)
     _G.determined_y = row_2.y
+    _G.row_opts = row_2_opts
 end
 
-local pos1
+local pos1 = 0
 
-if selected_row == row_1 then
-    pos1 = string.find(full_string, button_string)
-else
-    pos1 = string.find(full_string, button_string)
+for i, j in ipairs(row_opts) do
+    if j == button_string and i == selected_button then
+        pos1 = pos1 + 1
+        break
+    else
+        pos1 = pos1 + #j
+    end
 end
 
 invert(true)
@@ -182,6 +186,10 @@ repeat
             caps_lock = not caps_lock
         elseif code == 28 then
             if selected_row == row_1 then
+                local exists = pcall(component.invoke, selected_drive, "getLabel")
+                if not exists then
+                    goto sof
+                end
                 local text = "Booting..."
                 gpu.setForeground(0xcccccc)
                 gpu.fill(1, math.ceil(res_y/2)+5, res_x, 1, " ")
