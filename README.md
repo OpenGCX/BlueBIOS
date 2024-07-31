@@ -1,8 +1,8 @@
 # Blue BIOS
 We've reached stable!
 This is an OpenComputers BIOS designed to compete with CyanBIOS.
-## How does it work?
-Blue BIOS has a lightweight EEPROM which will automatically download the bootloader (bl) binaries from the internet. Upon downloading, it'll save the binary to the drive for quick loading (but only if there is a drive). Blue BIOS also supports plugins!
+## Functionality
+Blue BIOS has a lightweight EEPROM which will automatically download the bootloader (bl) binaries from the internet. Upon downloading, it'll save the binary to the drive for quick loading (but only if there is a drive). Blue BIOS also supports plugins under `/bios/plugins`.
 ## How to install
 ### Cyan BIOS
 Go to Netboot, enter `https://raw.githubusercontent.com/OpenGCX/BlueBIOS/main/netboot.lua` and run. It will automatically flash Blue for you.
