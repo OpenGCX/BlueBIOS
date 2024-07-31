@@ -1,6 +1,6 @@
 # Blue BIOS
 We've reached stable!
-This is an OpenComputers BIOS designed to compete with CyanBIOS.
+This is an OpenComputers BIOS designed to compete with Cyan BIOS.
 ## Functionality
 Blue BIOS has a lightweight EEPROM which will automatically download the bootloader (bl) binaries from the internet. Upon downloading, it'll save the binary to the drive for quick loading (but only if there is a drive). Blue BIOS also supports plugins under `/bios/plugins`.
 ## How to install
