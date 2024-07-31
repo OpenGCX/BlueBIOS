@@ -1,5 +1,7 @@
 ::sof::
 
+local trigger1, trigger2
+
 local component = component or require("component") ---@diagnostic disable-line: undefined-global
 local computer = computer or require("computer") ---@diagnostic disable-line: undefined-global
 
@@ -170,7 +172,7 @@ end
 invert(false)
 
 repeat
-    local event, _, _, code = computer.pullSignal()
+    local event, _, char, code = computer.pullSignal()
     if event == "key_down" then
         if code == 200 then
             selected_row = row_1
@@ -184,6 +186,14 @@ repeat
             shift = true
         elseif code == 58 then
             caps_lock = not caps_lock
+        elseif code == 29 or code == 157 then
+            trigger1 = true
+        elseif code == 56 or code == 184 then
+            trigger2 = true
+        elseif code == 46 then
+            if trigger1 and trigger2 then
+                computer.shutdown()
+            end
         elseif code == 28 then
             if selected_row == row_1 then
                 local exists = pcall(component.invoke, selected_drive, "getLabel")
@@ -418,6 +428,10 @@ repeat
     elseif event == "key_up" then
         if code == 42 or code == 54 then
             shift = false
+        elseif code == 29 or code == 157 then
+            trigger1 = false
+        elseif code == 56 or code == 184 then
+            trigger2 = false
         end
     end
     goto render
