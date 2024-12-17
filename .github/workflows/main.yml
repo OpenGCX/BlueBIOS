@@ -26,6 +26,7 @@ jobs:
 
       - name: Build base file1
         run: |
+          luamin -f src/blue.lua
           luamin -f src/blue.lua > minified.lua
           lua src/compressor.lua
         working-directory: result/
