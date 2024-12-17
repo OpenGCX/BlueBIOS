@@ -26,13 +26,13 @@ jobs:
 
       - name: Build base file1
         run: |
-          luamin src/blue.lua -o result/minified.lua
+          luamin -f src/blue.lua > result/minified.lua
           lua src/compressor.lua
         working-directory: result/
 
       - name: Build base file2
         run: |
-          luamin src/bl/bl.lua -o result/bl/minified.lua
+          luamin -f src/bl/bl.lua > result/bl/minified.lua
           lua src/bl/compressor.lua
         working-directory: result/bl/
 
