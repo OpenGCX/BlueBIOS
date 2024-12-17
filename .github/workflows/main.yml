@@ -23,18 +23,21 @@ jobs:
       - name: Result directories
         run: |
           mkdir -p result/bl/
+          cp src/blue.lua result/blue.lua
+          cp src/compressor.lua result/compressor.lua
+          cp src/bl/bl.lua result/bl/bl.lua
+          cp src/bl/compressor.lua result/bl/compressor.lua
 
       - name: Build base file1
         run: |
-          luamin -f src/blue.lua
-          luamin -f src/blue.lua > minified.lua
-          lua src/compressor.lua
+          luamin -f blue.lua > minified.lua
+          lua compressor.lua
         working-directory: result/
 
       - name: Build base file2
         run: |
-          luamin -f src/bl/bl.lua > minified.lua
-          lua src/bl/compressor.lua
+          luamin -f bl.lua > minified.lua
+          lua compressor.lua
         working-directory: result/bl/
 
       - name: Upload artifact1
