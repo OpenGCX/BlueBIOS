@@ -1,0 +1,49 @@
+name: Build file
+
+on: [workflow_dispatch]
+
+jobs:
+  setup-environment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync code
+        uses: actions/checkout@v3
+
+      - name: Set up Lua
+        uses: leafo/gh-actions-lua@v10.0.0
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4.1.0
+
+      - name: Install luamin
+        run: |
+          npm install -g luamin
+
+      - name: Result directories
+        run: |
+          mkdir -p result/bl/
+
+      - name: Build base file1
+        run: |
+          luamin src/blue.lua -o result/minified.lua
+          lua src/compressor.lua
+        working-directory: result/
+
+      - name: Build base file2
+        run: |
+          luamin src/bl/bl.lua -o result/bl/minified.lua
+          lua src/bl/compressor.lua
+        working-directory: result/bl/
+
+      - name: Upload artifact1
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifact-1
+          path: result/blue.bin
+
+      - name: Upload artifact2
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifact-2
+          path: result/bl/bl.bin
