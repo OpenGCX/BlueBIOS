@@ -30,6 +30,7 @@ jobs:
 
       - name: Build base file1
         run: |
+          luamin -f blue.lua
           luamin -f blue.lua > minified.lua
           lua compressor.lua
         working-directory: result/
