@@ -22,17 +22,17 @@ jobs:
 
       - name: Result directories
         run: |
-          mkdir -p /result/bl/
+          mkdir -p result/bl/
 
       - name: Build base file1
         run: |
-          luamin -f src/blue.lua > /result/minified.lua
+          luamin -f src/blue.lua > minified.lua
           lua src/compressor.lua
         working-directory: result/
 
       - name: Build base file2
         run: |
-          luamin -f src/bl/bl.lua > /result/bl/minified.lua
+          luamin -f src/bl/bl.lua > minified.lua
           lua src/bl/compressor.lua
         working-directory: result/bl/
 
