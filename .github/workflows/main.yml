@@ -27,7 +27,8 @@ jobs:
           cp src/compressor.lua result/compressor.lua
           cp src/bl/bl.lua result/bl/bl.lua
           cp src/bl/compressor.lua result/bl/compressor.lua
-          echo A
+          ls -l result/
+          ls -l src/
 
       - name: Build base file1
         run: |
