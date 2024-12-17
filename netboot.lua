@@ -33,7 +33,7 @@ if not internet.isHttpEnabled() then
     reboot()
 end
 
-local request = internet.request("https://raw.githubusercontent.com/OpenGCX/BlueBIOS/main/binaries/blue.bin")
+local request = internet.request("https://raw.githubusercontent.com/LibreFlock/BlueBIOS/main/binaries/blue.bin")
 
 if request then
     new_line("SUCCESS Fetched data")
