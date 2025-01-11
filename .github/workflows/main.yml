@@ -22,6 +22,7 @@ jobs:
 
       - name: Result directories
         run: |
+          pwd
           mkdir -p result/bl/
           cp src/blue.lua result/blue.lua
           cp src/compressor.lua result/compressor.lua
@@ -33,6 +34,7 @@ jobs:
       - name: Build base file1
         working-directory: ./result/
         run: |
+          pwd
           luamin -f blue.lua > minified.lua
 
       - name: Build base file2
