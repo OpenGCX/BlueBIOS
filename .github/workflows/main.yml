@@ -34,6 +34,7 @@ jobs:
       - name: Build base file1
         working-directory: ./result/
         run: |
+          set -x
           pwd
           luamin -f blue.lua > minified.lua
 
