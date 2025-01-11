@@ -29,27 +29,18 @@ jobs:
           cp src/compressor.lua result/compressor.lua
           cp src/bl/bl.lua result/bl/bl.lua
           cp src/bl/compressor.lua result/bl/compressor.lua
-          ls -l result/
-          ls -l src/
-
-      - name: Does luamin work
-        run: |
-          pwd
-          echo 'a = ((1 + 2) - 3) * (4 / (5 ^ 6))' > test.lua
-          node --version
-          bash -c "luamin -f /home/runner/work/BlueBIOS/BlueBIOS/test.lua"
-          luamin -f test.lua > testtest.lua
-          cat testtest.lua
 
       - name: Build base file1
         working-directory: ./result/
         run: |
-          luamin -f blue.lua > minified.lua || (echo "Luamin error: $?"; cat blue.lua; exit 1)
+          luamin -f blue.lua > minified.lua
+          lua compressor.lua
 
       - name: Build base file2
-        working-directory: ./result/
+        working-directory: ./result/bl/
         run: |
           luamin -f bl.lua > minified.lua
+          lua compressor.lua
 
       - name: Upload artifact1
         uses: actions/upload-artifact@v3
