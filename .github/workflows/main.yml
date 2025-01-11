@@ -36,6 +36,7 @@ jobs:
         run: |
           set -x
           pwd
+          which luamin || (echo "luamin not found!" && exit 1)
           luamin -f blue.lua > minified.lua
 
       - name: Build base file2
