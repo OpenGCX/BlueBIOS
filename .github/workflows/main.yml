@@ -23,12 +23,21 @@ jobs:
       - name: Result directories
         run: |
           mkdir -p result/bl/
+          mkdir test/
           cp src/blue.lua result/blue.lua
           cp src/compressor.lua result/compressor.lua
           cp src/bl/bl.lua result/bl/bl.lua
           cp src/bl/compressor.lua result/bl/compressor.lua
           ls -l result/
           ls -l src/
+
+      - name: Does luamin work
+        working-directory: ./result/
+        run: |
+          echo 'a = ((1 + 2) - 3) * (4 / (5 ^ 6))' > test.lua
+          luamin -f test.lua
+          luamin -f test.lua > testtest.lua
+          cat testtest.lua
 
       - name: Build base file1
         working-directory: ./result/
