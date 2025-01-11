@@ -51,10 +51,12 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: blue-minified
+          path: /src/minified.lua
       - name: Download minified bootloader
         uses: actions/upload-artifact@v3
         with:
           name: bl-minified
+          path: /src/bl/minified.lua
 
       - name: Compress blue binary
         working-directory: ./src/
