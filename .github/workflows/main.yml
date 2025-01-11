@@ -1,6 +1,7 @@
 name: Build file
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch
 
 jobs:
   setup-environment:
@@ -22,34 +23,26 @@ jobs:
         run: |
           npm install --location=global @nicejsisverycool/luamin
 
-      - name: Result directories
-        run: |
-          mkdir -p result/bl/
-          cp src/blue.lua result/blue.lua
-          cp src/compressor.lua result/compressor.lua
-          cp src/bl/bl.lua result/bl/bl.lua
-          cp src/bl/compressor.lua result/bl/compressor.lua
-
-      - name: Build base file1
-        working-directory: ./result/
+      - name: Build the BIOS binary
+        working-directory: ./src/
         run: |
           luamin -f blue.lua > minified.lua
           lua compressor.lua
 
-      - name: Build base file2
-        working-directory: ./result/bl/
+      - name: Build external bootloader binary
+        working-directory: ./src/bl/
         run: |
           luamin -f bl.lua > minified.lua
           lua compressor.lua
 
-      - name: Upload artifact1
+      - name: Upload binary 1
         uses: actions/upload-artifact@v3
         with:
-          name: artifact-1
-          path: ./result/blue.bin
+          name: blue-binary
+          path: ./src/blue.bin
 
-      - name: Upload artifact2
+      - name: Upload binary 2
         uses: actions/upload-artifact@v3
         with:
-          name: artifact-2
-          path: ./result/bl/bl.bin
+          name: bl-binary
+          path: ./src/bl/bl.bin
