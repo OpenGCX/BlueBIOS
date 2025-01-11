@@ -32,8 +32,9 @@ jobs:
 
       - name: Does luamin work
         run: |
+          pwd
           echo 'a = ((1 + 2) - 3) * (4 / (5 ^ 6))' > test.lua
-          luamin -f test.lua
+          luamin -f /home/runner/work/test.lua
           luamin -f test.lua > testtest.lua
           cat testtest.lua
 
