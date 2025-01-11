@@ -37,7 +37,7 @@ jobs:
           pwd
           echo 'a = ((1 + 2) - 3) * (4 / (5 ^ 6))' > test.lua
           node --version
-          luamin -f /home/runner/work/BlueBIOS/BlueBIOS/test.lua
+          bash -c "luamin -f /home/runner/work/BlueBIOS/BlueBIOS/test.lua"
           luamin -f test.lua > testtest.lua
           cat testtest.lua
 
