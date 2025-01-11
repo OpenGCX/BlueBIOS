@@ -44,6 +44,8 @@ jobs:
     steps:
       - name: Sync code
         uses: actions/checkout@v3
+      - name: Set up Lua
+        uses: leafo/gh-actions-lua@v10.0.0
 
       - name: Download minified blue
         uses: actions/upload-artifact@v3
@@ -54,8 +56,6 @@ jobs:
         with:
           name: bl-minified
 
-      - name: Set up Lua
-        uses: leafo/gh-actions-lua@v10.0.0
       - name: Compress blue binary
         working-directory: ./src/
         run: |
