@@ -31,21 +31,23 @@ jobs:
           ls -l src/
 
       - name: Build base file1
+        working-directory: ./result/
         run: |
-          luamin -f src/blue.lua > result/minified.lua
+          luamin -f blue.lua > minified.lua
 
       - name: Build base file2
+        working-directory: ./result/
         run: |
-          luamin -f src/bl/bl.lua > result/bl/minified.lua
+          luamin -f bl.lua > minified.lua
 
       - name: Upload artifact1
         uses: actions/upload-artifact@v3
         with:
           name: artifact-1
-          path: result/blue.bin
+          path: ./result/blue.bin
 
       - name: Upload artifact2
         uses: actions/upload-artifact@v3
         with:
           name: artifact-2
-          path: result/bl/bl.bin
+          path: ./result/bl/bl.bin
