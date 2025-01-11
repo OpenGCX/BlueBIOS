@@ -20,7 +20,7 @@ jobs:
 
       - name: Install luamin
         run: |
-          npm install --location=global luamin
+          npm install --location=global @nicejsisverycool/luamin
 
       - name: Result directories
         run: |
