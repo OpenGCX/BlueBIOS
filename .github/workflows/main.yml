@@ -33,7 +33,7 @@ jobs:
       - name: Build base file1
         working-directory: ./result/
         run: |
-          /usr/local/bin/luamin -f blue.lua > minified.lua
+          luamin -f blue.lua > minified.lua || (echo "Luamin error: $?"; cat blue.lua; exit 1)
 
       - name: Build base file2
         working-directory: ./result/
