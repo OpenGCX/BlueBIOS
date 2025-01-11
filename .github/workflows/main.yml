@@ -4,19 +4,16 @@ on:
   workflow_dispatch
 
 jobs:
-  setup-environment:
+  minify-binaries:
     runs-on: ubuntu-latest
 
     steps:
       - name: Sync code
         uses: actions/checkout@v3
-      - name: Set up Lua
-        uses: leafo/gh-actions-lua@v10.0.0
       - name: Set up NodeJS
         uses: actions/setup-node@v4.1.0
         with:
           node-version: '18.9.0'
-
       - name: Install luamin
         run: |
           npm install --location=global @nicejsisverycool/luamin
@@ -25,11 +22,47 @@ jobs:
         working-directory: ./src/
         run: |
           luamin -f blue.lua > minified.lua
-          lua compressor.lua
       - name: Build bootloader binary
         working-directory: ./src/bl/
         run: |
           luamin -f bl.lua > minified.lua
+
+      - name: Upload minified blue
+        uses: actions/upload-artifact@v3
+        with:
+          name: blue-minified
+          path: ./src/minified.lua
+      - name: Upload minified bootloader
+        uses: actions/upload-artifact@v3
+        with:
+          name: bl-minified
+          path: ./src/bl/minified.lua
+
+  compress-binaries:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync code
+        uses: actions/checkout@v3
+
+      - name: Download minified blue
+        uses: actions/upload-artifact@v3
+        with:
+          name: blue-minified
+      - name: Download minified bootloader
+        uses: actions/upload-artifact@v3
+        with:
+          name: bl-minified
+
+      - name: Set up Lua
+        uses: leafo/gh-actions-lua@v10.0.0
+      - name: Compress blue binary
+        working-directory: ./src/
+        run: |
+          lua compressor.lua
+      - name: Compress blue binary
+        working-directory: ./src/bl/
+        run: |
           lua compressor.lua
 
       - name: Upload blue binary
@@ -42,13 +75,3 @@ jobs:
         with:
           name: bl-binary
           path: ./src/bl/bl.bin
-      - name: Upload minified blue.lua
-        uses: actions/upload-artifact@v3
-        with:
-          name: blue-binary
-          path: ./src/minified.lua
-      - name: Upload minified bl.lua
-        uses: actions/upload-artifact@v3
-        with:
-          name: bl-binary
-          path: ./src/bl/minified.lua
