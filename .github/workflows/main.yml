@@ -32,6 +32,7 @@ jobs:
 
       - name: Build base file1
         run: |
+          luamin --version
           luamin -f src/blue.lua > result/minified.lua
           lua result/compressor.lua
 
