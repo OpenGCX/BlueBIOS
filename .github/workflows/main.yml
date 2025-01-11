@@ -10,39 +10,43 @@ jobs:
     steps:
       - name: Sync code
         uses: actions/checkout@v3
-
       - name: Set up Lua
         uses: leafo/gh-actions-lua@v10.0.0
-
       - name: Set up NodeJS
         uses: actions/setup-node@v4.1.0
-        with:
-          node-version: '18.9.0'
 
       - name: Install luamin
         run: |
           npm install --location=global @nicejsisverycool/luamin
 
-      - name: Build the BIOS binary
+      - name: Build blue binary
         working-directory: ./src/
         run: |
           luamin -f blue.lua > minified.lua
           lua compressor.lua
-
-      - name: Build external bootloader binary
+      - name: Build bootloader binary
         working-directory: ./src/bl/
         run: |
           luamin -f bl.lua > minified.lua
           lua compressor.lua
 
-      - name: Upload binary 1
+      - name: Upload blue binary
         uses: actions/upload-artifact@v3
         with:
           name: blue-binary
           path: ./src/blue.bin
-
-      - name: Upload binary 2
+      - name: Upload bootloader binary
         uses: actions/upload-artifact@v3
         with:
           name: bl-binary
           path: ./src/bl/bl.bin
+      - name: Upload minified blue.lua
+        uses: actions/upload-artifact@v3
+        with:
+          name: blue-binary
+          path: ./src/minified.lua
+      - name: Upload minified bl.lua
+        uses: actions/upload-artifact@v3
+        with:
+          name: bl-binary
+          path: ./src/bl/minified.lua
