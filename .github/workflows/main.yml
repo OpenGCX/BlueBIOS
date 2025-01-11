@@ -32,14 +32,11 @@ jobs:
 
       - name: Build base file1
         run: |
-          luamin --version
           luamin -f src/blue.lua > result/minified.lua
-          lua result/compressor.lua
 
       - name: Build base file2
         run: |
           luamin -f src/bl/bl.lua > result/bl/minified.lua
-          lua result/bl/compressor.lua
 
       - name: Upload artifact1
         uses: actions/upload-artifact@v3
