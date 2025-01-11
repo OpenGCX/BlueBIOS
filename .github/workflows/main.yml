@@ -20,7 +20,7 @@ jobs:
 
       - name: Install luamin
         run: |
-          npm install -g luamin
+          npm install --location=global luamin
 
       - name: Result directories
         run: |
